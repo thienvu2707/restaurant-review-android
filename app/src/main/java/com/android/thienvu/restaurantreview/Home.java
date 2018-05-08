@@ -28,7 +28,6 @@ import com.android.thienvu.restaurantreview.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.squareup.picasso.Picasso;
 
 public class Home extends AppCompatActivity
@@ -88,7 +87,13 @@ public class Home extends AppCompatActivity
         layoutManager = new LinearLayoutManager(this);
         recycler_menu.setLayoutManager(layoutManager);
 
-        loadMenu();
+        if (Common.isConnectedToInternet(this))
+            loadMenu();
+        else
+        {
+            Toast.makeText(Home.this, "Please check your connection", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
     }
 
@@ -134,6 +139,8 @@ public class Home extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.refresh)
+            loadMenu();
 
         return super.onOptionsItemSelected(item);
     }
@@ -151,6 +158,9 @@ public class Home extends AppCompatActivity
         } else if (id == R.id.nav_orders) {
 
         } else if (id == R.id.nav_log_out) {
+            Intent signIn = new Intent(Home.this, SignIn.class);
+            signIn.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(signIn);
 
         }
 

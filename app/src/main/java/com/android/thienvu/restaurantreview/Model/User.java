@@ -2,15 +2,17 @@ package com.android.thienvu.restaurantreview.Model;
 
 public class User {
 
+    //private String Phone;
     private String Name;
     private String Password;
+    private String Phone;
 
     public User() {
     }
 
     public User(String name, String password) {
-        this.Name = name;
-        this.Password = password;
+        Name = name;
+        Password = password;
     }
 
     public String getName() {
@@ -18,7 +20,7 @@ public class User {
     }
 
     public void setName(String name) {
-        this.Name = name;
+        Name = name;
     }
 
     public String getPassword() {
@@ -26,6 +28,14 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.Password = password;
+        Password = password;
+    }
+
+    public String getPhone() {
+        return Phone;
+    }
+
+    public void setPhone(String phone) {
+        Phone = phone;
     }
 }

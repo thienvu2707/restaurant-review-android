@@ -31,20 +31,21 @@
             android:layout_height="wrap_content"
             android:textSize="35sp"
             android:inputType="textPassword"/>
-
-        <Button
-            android:id="@+id/btnSignIn"
-            android:text="Sign In"
-            android:textColor="@android:color/white"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:layout_margin="8dp"
-            android:shadowColor="@android:color/black"
-            android:background="@color/btnSignUpActive"
             />
+
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnSignIn"
+        android:text="Sign In"
+        android:textColor="@android:color/white"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:shadowColor="@android:color/black"
+        android:background="@color/btnSignUpActive"/>
 
 </RelativeLayout>
