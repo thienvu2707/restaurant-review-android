@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "767938672596",
+    "firebase_url": "https://restaurantreview-61ed5.firebaseio.com",
+    "project_id": "restaurantreview-61ed5",
+    "storage_bucket": "restaurantreview-61ed5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767938672596:android:0a381577f92b7f19",
+        "android_client_info": {
+          "package_name": "com.android.thienvu.restaurantreview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "767938672596-llh535mmmatkhjng54jigq3gl892a10f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.thienvu.restaurantreview",
+            "certificate_hash": "f1b7d1f185746114ed8b82ddd56be804d136f345"
+          }
+        },
+        {
+          "client_id": "767938672596-h437fiq7eibte3ggn9a241o5clje617d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDg2LWdYhFWrUS1L9DIglHa1Ws5SVLIecI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "767938672596-h437fiq7eibte3ggn9a241o5clje617d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

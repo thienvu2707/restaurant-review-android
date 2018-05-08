@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".SignIn">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editPhone"
+            android:hint="Phone Number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="35sp"
+            android:maxLength="11"
+            android:inputType="phone"/>
+
+        <EditText
+            android:id="@+id/editPassword"
+            android:hint="Enter your password......"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="35sp"
+            android:inputType="textPassword"/>
+
+        <Button
+            android:id="@+id/btnSignIn"
+            android:text="Sign In"
+            android:textColor="@android:color/white"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_margin="8dp"
+            android:shadowColor="@android:color/black"
+            android:background="@color/btnSignUpActive"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
