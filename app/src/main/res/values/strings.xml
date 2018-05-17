@@ -8,4 +8,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="facebook_app_id">1034806896658067</string>
+    <string name="facebook_login_protocol_name">fb1034806896658067</string>
+
 </resources>

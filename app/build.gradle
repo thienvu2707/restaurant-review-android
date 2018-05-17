@@ -37,6 +37,9 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-database:1.2.0'
     implementation 'com.github.mancj:MaterialSearchBar:0.7.1'
     implementation 'com.stepstone.apprating:app-rating:2.0.0'
+    implementation 'com.facebook.android:facebook-share:[4,5)'
+    implementation 'com.google.firebase:firebase-storage:10.2.0'
+    implementation 'com.google.firebase:firebase-auth:10.2.0'
 
 }
 

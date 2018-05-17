@@ -1,7 +1,15 @@
 package com.android.thienvu.restaurantreview;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,34 +17,56 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.thienvu.restaurantreview.Common.Common;
 import com.android.thienvu.restaurantreview.Interface.ItemClickListener;
+import com.android.thienvu.restaurantreview.Model.Category;
 import com.android.thienvu.restaurantreview.Model.Food;
 import com.android.thienvu.restaurantreview.ViewHolder.FoodViewHolder;
+import com.facebook.CallbackManager;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class FoodList extends AppCompatActivity {
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
+    RelativeLayout foodLayout;
+
+    FloatingActionButton fab;
 
     FirebaseDatabase database;
     DatabaseReference foodList;
+    FirebaseStorage storage;
+    StorageReference storageReference;
 
     String categoryId = "";
 
@@ -45,20 +75,82 @@ public class FoodList extends AppCompatActivity {
     //SearchBar variable
     FirebaseRecyclerAdapter<Food, FoodViewHolder> searchAdapter;
     List<String> suggestList = new ArrayList<>();
-    MaterialSearchBar materialSearchBarl;
+    MaterialSearchBar materialSearchBar;
+
+
+    CallbackManager callbackManager;
+    ShareDialog shareDialog;
+
+
+    EditText editName, editLocation, editPrice;
+
+    Button btnSelect, btnUpload;
+
+    Food newFood;
+
+    Uri saveUri;
+
+    Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            //Create photo from bitmap
+            SharePhoto photo = new SharePhoto.Builder()
+                    .setBitmap(bitmap)
+                    .build();
+            if (ShareDialog.canShow(SharePhotoContent.class))
+            {
+                SharePhotoContent content = new SharePhotoContent.Builder()
+                        .addPhoto(photo).build();
+                shareDialog.show(content);
+            }
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_list);
 
+
+        //Initial Facebook
+        callbackManager = new CallbackManager.Factory().create();
+        shareDialog = new ShareDialog(this);
+
+
         //FireBase
         database = FirebaseDatabase.getInstance();
         foodList = database.getReference("Food");
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_food);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+        foodLayout = (RelativeLayout) findViewById(R.id.foodLayout);
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showAddFoodDialog();
+
+            }
+        });
 
         //Get Intent From Home activity
         //check if id of each category null or not
@@ -75,12 +167,12 @@ public class FoodList extends AppCompatActivity {
         }
 
         //Query Search Function
-        materialSearchBarl = (MaterialSearchBar) findViewById(R.id.searchBar);
-        materialSearchBarl.setHint("Search for Restaurant and Food");
+        materialSearchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
+        materialSearchBar.setHint("Search for Restaurant and Food");
         loadSuggest();
-        materialSearchBarl.setLastSuggestions(suggestList);
-        materialSearchBarl.setCardViewElevation(10);
-        materialSearchBarl.addTextChangeListener(new TextWatcher() {
+        materialSearchBar.setLastSuggestions(suggestList);
+        materialSearchBar.setCardViewElevation(10);
+        materialSearchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -90,10 +182,10 @@ public class FoodList extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 List<String> suggest = new ArrayList<String>();
                 for (String search:suggestList) {
-                    if (search.toLowerCase().contains(materialSearchBarl.getText().toLowerCase()))
+                    if (search.toLowerCase().contains(materialSearchBar.getText().toLowerCase()))
                         suggest.add(search);
                 }
-                materialSearchBarl.setLastSuggestions(suggest);
+                materialSearchBar.setLastSuggestions(suggest);
             }
 
             @Override
@@ -102,7 +194,7 @@ public class FoodList extends AppCompatActivity {
             }
         });
 
-        materialSearchBarl.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+        materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
             public void onSearchStateChanged(boolean enabled) {
                 //Search bar closed, restore original adapter
@@ -122,6 +214,140 @@ public class FoodList extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showAddFoodDialog() {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(FoodList.this);
+        alertDialog.setTitle("Add New Restaurant or Food");
+        alertDialog.setMessage("Please Fill in Full information");
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View add_menu_layout = inflater.inflate(R.layout.add_new_food_layout, null);
+
+        editName = add_menu_layout.findViewById(R.id.editName);
+        editLocation = add_menu_layout.findViewById(R.id.editLocation);
+        editPrice = add_menu_layout.findViewById(R.id.editPrice);
+
+        btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
+        btnUpload = add_menu_layout.findViewById(R.id.btnUpload);
+
+
+        //Event for each button in create Category dialog
+        //Upload and select
+        btnSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chooseImage();
+            }
+        });
+
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadImage();
+            }
+        });
+
+
+        alertDialog.setView(add_menu_layout);
+        alertDialog.setIcon(R.drawable.ic_shopping_cart_black_24dp);
+
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+                if (newFood != null)
+                {
+                    foodList.push().setValue(newFood);
+                    Snackbar.make(foodLayout, "New Category "+newFood.getName() + " was added", Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
+
+    }
+
+
+    private void uploadImage() {
+
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
+
+
+            String imageName = UUID.randomUUID().toString();
+            final StorageReference imageFolder = storageReference.child("images/"+imageName);
+            imageFolder.putFile(saveUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            mDialog.dismiss();
+                            Toast.makeText(FoodList.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
+                            imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    //set value for newCategory if image upload and we can get download link
+                                    newFood = new Food();
+                                    newFood.setName(editName.getText().toString());
+                                    newFood.setDescription(editLocation.getText().toString());
+                                    newFood.setPrice(editPrice.getText().toString());
+                                    newFood.setMenuId(categoryId);
+                                    newFood.setImage(uri.toString());
+                                }
+                            });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            mDialog.dismiss();
+                            Toast.makeText(FoodList.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                            mDialog.setMessage("Uploaded " + progress + "%");
+                        }
+                    });
+        }
+
+    }
+
+
+    private void chooseImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), Common.PICK_IMAGE_REQUEST);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Common.PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null)
+        {
+            saveUri = data.getData();
+            btnSelect.setText("Selected");
+        }
     }
 
     private void startSearch(CharSequence text) {
@@ -169,11 +395,20 @@ public class FoodList extends AppCompatActivity {
     }
 
     private void loadListFood(String categoryId) {
-        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(Food.class, R.layout.food_item, FoodViewHolder.class, foodList.orderByChild("MenuId").equalTo(categoryId)) {
+        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(Food.class, R.layout.food_item, FoodViewHolder.class, foodList.orderByChild("menuId").equalTo(categoryId)) {
             @Override
-            protected void populateViewHolder(FoodViewHolder viewHolder, Food model, int position) {
+            protected void populateViewHolder(FoodViewHolder viewHolder, final Food model, int position) {
                 viewHolder.food_name.setText(model.getName());
                 Picasso.with(getBaseContext()).load(model.getImage()).into(viewHolder.food_image);
+
+
+                //click to Share to Facebook
+                viewHolder.shareImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Picasso.with(getApplicationContext()).load(model.getImage()).into(target);
+                    }
+                });
 
                 final Food local = model;
                 viewHolder.setItemClickListener(new ItemClickListener() {
@@ -189,6 +424,144 @@ public class FoodList extends AppCompatActivity {
         };
 
         //set Adapter
+        adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        if (item.getTitle().equals(Common.UPDATE))
+        {
+            showUpdateFoodDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
+
+        } else if (item.getTitle().equals(Common.DELETE))
+        {
+
+            deleteFood(adapter.getRef(item.getOrder()).getKey());
+            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+
+
+    private void deleteFood(String key) {
+        foodList.child(key).removeValue();
+    }
+
+
+
+    private void showUpdateFoodDialog(final String key, final Food item) {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(FoodList.this);
+        alertDialog.setTitle("Edit Restaurant or Food");
+        alertDialog.setMessage("Please Fill in Full information");
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View add_menu_layout = inflater.inflate(R.layout.add_new_food_layout, null);
+
+        editName = add_menu_layout.findViewById(R.id.editName);
+        editLocation = add_menu_layout.findViewById(R.id.editLocation);
+        editPrice = add_menu_layout.findViewById(R.id.editPrice);
+
+        editName.setText(item.getName());
+        editLocation.setText(item.getDescription());
+        editPrice.setText(item.getPrice());
+
+        btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
+        btnUpload = add_menu_layout.findViewById(R.id.btnUpload);
+
+
+        //Event for each button in create Category dialog
+        //Upload and select
+        btnSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chooseImage();
+            }
+        });
+
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeImage(item);
+            }
+        });
+
+
+        alertDialog.setView(add_menu_layout);
+        alertDialog.setIcon(R.drawable.ic_shopping_cart_black_24dp);
+
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+
+
+                    item.setName(editName.getText().toString());
+                    item.setPrice(editPrice.getText().toString());
+                    item.setDescription(editLocation.getText().toString());
+
+                    foodList.child(key).setValue(item);
+                    Snackbar.make(foodLayout, " Food or drink "+item.getName() + " was edited", Snackbar.LENGTH_SHORT).show();
+
+            }
+        });
+
+        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
+    }
+
+    private void changeImage(final Food item) {
+
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
+
+
+            String imageName = UUID.randomUUID().toString();
+            final StorageReference imageFolder = storageReference.child("images/"+imageName);
+            imageFolder.putFile(saveUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            mDialog.dismiss();
+                            Toast.makeText(FoodList.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
+                            imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    //set value for newCategory if image upload and we can get download link
+                                    item.setImage(uri.toString());
+                                }
+                            });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            mDialog.dismiss();
+                            Toast.makeText(FoodList.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                            mDialog.setMessage("Uploaded " + progress + "%");
+                        }
+                    });
+        }
     }
 }

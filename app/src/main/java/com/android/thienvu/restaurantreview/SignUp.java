@@ -50,9 +50,9 @@ public class SignUp extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             //check if already user phone
-                            if (dataSnapshot.child(editPhone.getText().toString()).exists()) {
+                            if (dataSnapshot.child(editPhone.getText().toString()).exists() || dataSnapshot.child(editName.getText().toString()).exists()) {
                                 mDialog.dismiss();
-                                Toast.makeText(SignUp.this, "Phone number already registered", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignUp.this, "Phone number or User Name already registered", Toast.LENGTH_SHORT).show();
                             } else {
                                 mDialog.dismiss();
                                 User user = new User(editName.getText().toString(), editPassword.getText().toString());

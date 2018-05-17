@@ -174,24 +174,24 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     @Override
     public void onPositiveButtonClicked(int value, String comments) {
         //Get Rating and post to Database
-        final Rating rating = new Rating(Common.currentUser.getPhone(), foodId, String.valueOf(value), comments);
+        final Rating rating = new Rating(Common.currentUser.getName(), foodId, String.valueOf(value), comments);
 
-        ratingTable.child(Common.currentUser.getPhone()).addValueEventListener(new ValueEventListener() {
+        ratingTable.child(Common.currentUser.getName()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
 
 
                 //Check if user of that phone number is already rating
-                if (dataSnapshot.child(Common.currentUser.getPhone()).exists())
+                if (dataSnapshot.child(Common.currentUser.getName()).exists())
                 {
                     //Remove old data
-                    ratingTable.child(Common.currentUser.getPhone()).removeValue();
+                    ratingTable.child(Common.currentUser.getName()).removeValue();
                     //Update with the new one
-                    ratingTable.child(Common.currentUser.getPhone()).setValue(rating);
+                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
                 } else {
                     //Create new rating
-                    ratingTable.child(Common.currentUser.getPhone()).setValue(rating);
+                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
                 }
 
                 Toast.makeText(FoodDetail.this, "Thank you for submit rating!!!", Toast.LENGTH_SHORT).show();
