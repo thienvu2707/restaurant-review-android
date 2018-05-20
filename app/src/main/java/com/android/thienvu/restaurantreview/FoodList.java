@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -90,6 +91,8 @@ public class FoodList extends AppCompatActivity {
 
     Uri saveUri;
 
+    SwipeRefreshLayout swipeRefreshLayout;
+
     Target target = new Target() {
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -129,6 +132,46 @@ public class FoodList extends AppCompatActivity {
         shareDialog = new ShareDialog(this);
 
 
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                //Get Intent From Home activity
+                //check if id of each category null or not
+                if (getIntent() != null)
+                    categoryId = getIntent().getStringExtra("CategoryId");
+                if (!categoryId.isEmpty() && categoryId != null) {
+
+                    if (Common.isConnectedToInternet(getBaseContext()))
+                        loadListFood(categoryId);
+                    else {
+                        Toast.makeText(FoodList.this, "Please check your connection", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+            }
+        });
+
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                //Get Intent From Home activity
+                //check if id of each category null or not
+                if (getIntent() != null)
+                    categoryId = getIntent().getStringExtra("CategoryId");
+                if (!categoryId.isEmpty() && categoryId != null) {
+
+                    if (Common.isConnectedToInternet(getBaseContext()))
+                        loadListFood(categoryId);
+                    else {
+                        Toast.makeText(FoodList.this, "Please check your connection", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+            }
+        });
+
         //FireBase
         database = FirebaseDatabase.getInstance();
         foodList = database.getReference("Food");
@@ -152,19 +195,7 @@ public class FoodList extends AppCompatActivity {
             }
         });
 
-        //Get Intent From Home activity
-        //check if id of each category null or not
-        if (getIntent() != null)
-            categoryId = getIntent().getStringExtra("CategoryId");
-        if (!categoryId.isEmpty() && categoryId != null) {
 
-            if (Common.isConnectedToInternet(getBaseContext()))
-                loadListFood(categoryId);
-            else {
-                Toast.makeText(FoodList.this, "Please check your connection", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
 
         //Query Search Function
         materialSearchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
@@ -352,7 +383,7 @@ public class FoodList extends AppCompatActivity {
 
     private void startSearch(CharSequence text) {
 
-        searchAdapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(Food.class, R.layout.food_item, FoodViewHolder.class, foodList.orderByChild("Name").equalTo(text.toString())) {
+        searchAdapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(Food.class, R.layout.food_item, FoodViewHolder.class, foodList.orderByChild("name").equalTo(text.toString())) {
             @Override
             protected void populateViewHolder(FoodViewHolder viewHolder, Food model, int position) {
 
@@ -378,7 +409,7 @@ public class FoodList extends AppCompatActivity {
      * Search function loadding suggestion history
      */
     private void loadSuggest() {
-        foodList.orderByChild("MenuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
+        foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -426,6 +457,7 @@ public class FoodList extends AppCompatActivity {
         //set Adapter
         adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

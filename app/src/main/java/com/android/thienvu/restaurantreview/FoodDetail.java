@@ -53,8 +53,8 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
         ratingTable = database.getReference("Rating");
 
         //Initial View
-        numberButton = (ElegantNumberButton) findViewById(R.id.number_button);
-        btnCart = (FloatingActionButton) findViewById(R.id.btnCart);
+//        numberButton = (ElegantNumberButton) findViewById(R.id.number_button);
+//        btnCart = (FloatingActionButton) findViewById(R.id.btnCart);
         btnRating = (FloatingActionButton) findViewById(R.id.btn_rating);
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
 

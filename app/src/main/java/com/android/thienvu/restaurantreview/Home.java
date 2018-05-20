@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,7 +45,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.UUID;
 
-public class Home extends AppCompatActivity
+public class  Home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     FirebaseDatabase database;
@@ -63,6 +64,8 @@ public class Home extends AppCompatActivity
     Category newCategory;
     Uri saveUri;
 
+    SwipeRefreshLayout swipeRefreshLayout;
+
 
     DrawerLayout drawer;
 
@@ -75,6 +78,39 @@ public class Home extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Menu");
         setSupportActionBar(toolbar);
+
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                if (Common.isConnectedToInternet(Home.this))
+                    loadMenu();
+                else
+                {
+                    Toast.makeText(Home.this, "Please check your connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+            }
+        });
+
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+
+                if (Common.isConnectedToInternet(Home.this))
+                    loadMenu();
+                else
+                {
+                    Toast.makeText(Home.this, "Please check your connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+            }
+        });
+
 
 
         //Initial Database
@@ -112,14 +148,6 @@ public class Home extends AppCompatActivity
         recycler_menu.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recycler_menu.setLayoutManager(layoutManager);
-
-        if (Common.isConnectedToInternet(this))
-            loadMenu();
-        else
-        {
-            Toast.makeText(Home.this, "Please check your connection", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
     }
 
@@ -282,6 +310,7 @@ public class Home extends AppCompatActivity
         };
         adapter.notifyDataSetChanged();
         recycler_menu.setAdapter(adapter);
+        swipeRefreshLayout.setRefreshing(false);
 
     }
 

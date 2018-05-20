@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/foodLayout"
+    android:id="@+id/swipe_layout"
     tools:context=".FoodList">
+
+    <RelativeLayout
+        android:id="@+id/foodLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <com.mancj.materialsearchbar.MaterialSearchBar
         android:layout_width="match_parent"
@@ -34,4 +40,6 @@
         android:backgroundTint="@android:color/white"
         app:srcCompat="@drawable/ic_playlist_add_black_24dp" />
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</android.support.v4.widget.SwipeRefreshLayout>

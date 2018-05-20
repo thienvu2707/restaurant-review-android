@@ -3,7 +3,7 @@
     package="com.android.thienvu.restaurantreview">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -12,10 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
-
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -31,14 +30,14 @@
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".FoodList" />
-        <activity android:name=".FoodDetail"></activity>
-
+        <activity android:name=".FoodDetail" />
 
         <provider
-            android:authorities="com.facebook.app.FacebookContentProvider1034806896658067"
             android:name="com.facebook.FacebookContentProvider"
-            android:exported="true"/>
+            android:authorities="com.facebook.app.FacebookContentProvider1034806896658067"
+            android:exported="true" />
 
+        <activity android:name=".ShowComment"></activity>
     </application>
 
 </manifest>
