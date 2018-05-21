@@ -1,5 +1,7 @@
 package com.android.thienvu.restaurantreview;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +17,8 @@ import com.android.thienvu.restaurantreview.Common.Common;
 import com.android.thienvu.restaurantreview.Model.Food;
 import com.android.thienvu.restaurantreview.Model.Rating;
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,12 +46,27 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     DatabaseReference food;
     DatabaseReference ratingTable;
 
+    Button btnShowComment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_detail);
 
-        //Firebase connection
+
+        btnShowComment = (Button) findViewById(R.id.btnShowComment);
+        btnShowComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FoodDetail.this, ShowComment.class);
+                intent.putExtra(Common.INTENT_FOOD_ID, foodId);
+
+                startActivity(intent);
+
+            }
+        });
+
+        //FireBase connection
         database = FirebaseDatabase.getInstance();
         food = database.getReference("Food");
         ratingTable = database.getReference("Rating");
@@ -174,34 +193,46 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     @Override
     public void onPositiveButtonClicked(int value, String comments) {
         //Get Rating and post to Database
-        final Rating rating = new Rating(Common.currentUser.getName(), foodId, String.valueOf(value), comments);
+        final Rating rating = new Rating(Common.currentUser.getName(),
+                foodId,
+                String.valueOf(value),
+                comments);
 
-        ratingTable.child(Common.currentUser.getName()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+        ratingTable.push()
+                .setValue(rating)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(FoodDetail.this, "Thank you for submit rating!!!", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-
-
-                //Check if user of that phone number is already rating
-                if (dataSnapshot.child(Common.currentUser.getName()).exists())
-                {
-                    //Remove old data
-                    ratingTable.child(Common.currentUser.getName()).removeValue();
-                    //Update with the new one
-                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
-                } else {
-                    //Create new rating
-                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
-                }
-
-                Toast.makeText(FoodDetail.this, "Thank you for submit rating!!!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        ratingTable.child(Common.currentUser.getName()).addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//
+//
+//                //Check if user of that phone number is already rating
+//                if (dataSnapshot.child(Common.currentUser.getName()).exists())
+//                {
+//                    //Remove old data
+//                    ratingTable.child(Common.currentUser.getName()).removeValue();
+//                    //Update with the new one
+//                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
+//                } else {
+//                    //Create new rating
+//                    ratingTable.child(Common.currentUser.getName()).setValue(rating);
+//                }
+//
+//                Toast.makeText(FoodDetail.this, "Thank you for submit rating!!!", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     @Override

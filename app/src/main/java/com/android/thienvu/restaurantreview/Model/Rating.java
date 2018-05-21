@@ -2,24 +2,24 @@ package com.android.thienvu.restaurantreview.Model;
 
 public class Rating {
 
-    private String userPhone, foodId, rateValue, comment;
+    private String userName, foodId, rateValue, comment;
 
     public Rating() {
     }
 
-    public Rating(String userPhone, String foodId, String rateValue, String comment) {
-        this.userPhone = userPhone;
+    public Rating(String userName, String foodId, String rateValue, String comment) {
+        this.userName = userName;
         this.foodId = foodId;
         this.rateValue = rateValue;
         this.comment = comment;
     }
 
-    public String getUserPhone() {
-        return userPhone;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUserPhone(String userPhone) {
-        this.userPhone = userPhone;
+    public void setUserName(String userPhone) {
+        this.userName = userPhone;
     }
 
     public String getFoodId() {

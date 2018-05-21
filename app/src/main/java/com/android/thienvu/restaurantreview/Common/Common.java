@@ -13,6 +13,7 @@ public class Common {
     public static final String DELETE = "Delete";
     public static final int PICK_IMAGE_REQUEST = 71;
 
+    public static final String INTENT_FOOD_ID = "FoodId";
     public static boolean isConnectedToInternet (Context context)
     {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
