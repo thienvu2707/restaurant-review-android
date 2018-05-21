@@ -83,7 +83,7 @@ public class FoodList extends AppCompatActivity {
     ShareDialog shareDialog;
 
 
-    EditText editName, editLocation, editPrice;
+    EditText editUserId, editName, editLocation, editTypeOfFood, editPrice;
 
     Button btnSelect, btnUpload;
 
@@ -256,8 +256,10 @@ public class FoodList extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View add_menu_layout = inflater.inflate(R.layout.add_new_food_layout, null);
 
+        editUserId = add_menu_layout.findViewById(R.id.editUserId);
         editName = add_menu_layout.findViewById(R.id.editName);
         editLocation = add_menu_layout.findViewById(R.id.editLocation);
+        editTypeOfFood = add_menu_layout.findViewById(R.id.editTypeFood);
         editPrice = add_menu_layout.findViewById(R.id.editPrice);
 
         btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
@@ -312,6 +314,14 @@ public class FoodList extends AppCompatActivity {
 
 
     private void uploadImage() {
+
+        String validateUserId = editUserId.getText().toString();
+        String validateName = editName.getText().toString();
+
+        if (validateUserId.isEmpty())
+            editUserId.setError("Please enter User Id");
+        if (validateName.isEmpty())
+            editName.setError("Please enter Name");
 
         if (saveUri != null)
         {
@@ -406,23 +416,25 @@ public class FoodList extends AppCompatActivity {
     }
 
     /**
-     * Search function loadding suggestion history
+     * Search function loading suggestion history
      */
     private void loadSuggest() {
-        foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Food item = postSnapshot.getValue(Food.class);
-                    suggestList.add(item.getName());
-                }
-            }
+        foodList.orderByChild("menuId").equalTo(categoryId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+                        {
+                            Food item = postSnapshot.getValue(Food.class);
+                            suggestList.add(item.getName());
+                        }
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                    }
+                });
     }
 
     private void loadListFood(String categoryId) {
@@ -494,10 +506,14 @@ public class FoodList extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         View add_menu_layout = inflater.inflate(R.layout.add_new_food_layout, null);
 
+
+        editUserId = add_menu_layout.findViewById(R.id.editUserId);
         editName = add_menu_layout.findViewById(R.id.editName);
         editLocation = add_menu_layout.findViewById(R.id.editLocation);
+        editTypeOfFood = add_menu_layout.findViewById(R.id.editTypeFood);
         editPrice = add_menu_layout.findViewById(R.id.editPrice);
 
+        editUserId.setText("ThienVu");
         editName.setText(item.getName());
         editLocation.setText(item.getDescription());
         editPrice.setText(item.getPrice());

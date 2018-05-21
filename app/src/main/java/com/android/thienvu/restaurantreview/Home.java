@@ -218,6 +218,11 @@ public class  Home extends AppCompatActivity
      */
     private void uploadImage() {
 
+        String validateName = editNameCategory.getText().toString();
+
+        if (validateName.isEmpty())
+            editNameCategory.setError("Please enter Establishment");
+
         if (saveUri != null)
         {
             final ProgressDialog mDialog = new ProgressDialog(this);
